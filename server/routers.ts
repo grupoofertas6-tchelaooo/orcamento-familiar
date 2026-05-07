@@ -7,19 +7,25 @@ import {
   addCard,
   addDebt,
   addExpense,
+  addGoal,
   addIncome,
   addSalary,
   deleteCard,
   deleteDebt,
   deleteExpense,
+  deleteGoal,
   deleteIncome,
   deleteSalary,
+  depositGoal,
   getCardsByUser,
   getDebtsByUser,
   getExpensesByUser,
+  getGoalsByUser,
   getIncomesByUser,
   getSalariesByUser,
   toggleDebtPaid,
+  toggleGoalCompleted,
+  updateGoal,
 } from "./db";
 
 const expenseCategories = [
@@ -42,6 +48,8 @@ const debtTypes = [
 ] as const;
 
 const cardFlags = ["Visa", "Mastercard", "Elo", "Hipercard"] as const;
+
+const goalCategories = ["Viagem", "Casa", "Carro", "Educacao", "Saude", "Lazer", "Outros"] as const;
 
 export const appRouter = router({
   system: systemRouter,
@@ -232,6 +240,86 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
         await deleteCard(input.id, ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
+  // ── METAS ─────────────────────────────────────────────────────────────────────
+  goals: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const rows = await getGoalsByUser(ctx.user.id);
+      return rows.map((r) => ({
+        ...r,
+        targetAmount: parseFloat(r.targetAmount as unknown as string),
+        currentAmount: parseFloat(r.currentAmount as unknown as string),
+        dueDate: r.dueDate instanceof Date ? r.dueDate.toISOString().split("T")[0] : (r.dueDate ? String(r.dueDate) : null),
+      }));
+    }),
+
+    add: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().min(1),
+          description: z.string().optional().default(""),
+          targetAmount: z.number().positive(),
+          category: z.enum(goalCategories),
+          dueDate: z.string().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await addGoal(
+          ctx.user.id,
+          input.name,
+          input.description,
+          String(input.targetAmount),
+          input.category,
+          input.dueDate || null
+        );
+        return { success: true };
+      }),
+
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().min(1),
+          description: z.string().optional().default(""),
+          targetAmount: z.number().positive(),
+          category: z.enum(goalCategories),
+          dueDate: z.string().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await updateGoal(
+          input.id,
+          ctx.user.id,
+          input.name,
+          input.description,
+          String(input.targetAmount),
+          input.category,
+          input.dueDate || null
+        );
+        return { success: true };
+      }),
+
+    deposit: protectedProcedure
+      .input(z.object({ id: z.number(), amount: z.number().positive() }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await depositGoal(input.id, ctx.user.id, String(input.amount));
+        return result;
+      }),
+
+    toggleCompleted: protectedProcedure
+      .input(z.object({ id: z.number(), completed: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        await toggleGoalCompleted(input.id, ctx.user.id, input.completed);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteGoal(input.id, ctx.user.id);
         return { success: true };
       }),
   }),

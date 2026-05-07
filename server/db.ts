@@ -4,6 +4,7 @@ import {
   cards,
   debts,
   expenses,
+  goals,
   incomes,
   InsertUser,
   salaries,
@@ -181,4 +182,82 @@ export async function deleteCard(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   await db.delete(cards).where(and(eq(cards.id, id), eq(cards.userId, userId)));
+}
+
+// ── METAS ─────────────────────────────────────────────────────────────────────
+export async function getGoalsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(goals).where(eq(goals.userId, userId));
+}
+
+export async function addGoal(
+  userId: number,
+  name: string,
+  description: string,
+  targetAmount: string,
+  category: typeof goals.$inferInsert["category"],
+  dueDate: string | null
+) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.insert(goals).values({
+    userId,
+    name,
+    description,
+    targetAmount,
+    category,
+    dueDate: dueDate ? new Date(dueDate) : null,
+    currentAmount: "0",
+    completed: false,
+  });
+}
+
+export async function updateGoal(
+  id: number,
+  userId: number,
+  name: string,
+  description: string,
+  targetAmount: string,
+  category: typeof goals.$inferInsert["category"],
+  dueDate: string | null
+) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db
+    .update(goals)
+    .set({
+      name,
+      description,
+      targetAmount,
+      category,
+      dueDate: dueDate ? new Date(dueDate) : null,
+    })
+    .where(and(eq(goals.id, id), eq(goals.userId, userId)));
+}
+
+export async function depositGoal(id: number, userId: number, amount: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const goal = await db.select().from(goals).where(and(eq(goals.id, id), eq(goals.userId, userId))).limit(1);
+  if (!goal.length) throw new Error("Goal not found");
+  const newAmount = parseFloat(goal[0].currentAmount.toString()) + parseFloat(amount);
+  const isCompleted = newAmount >= parseFloat(goal[0].targetAmount.toString());
+  await db
+    .update(goals)
+    .set({ currentAmount: newAmount.toString(), completed: isCompleted })
+    .where(and(eq(goals.id, id), eq(goals.userId, userId)));
+  return { completed: isCompleted, newAmount };
+}
+
+export async function toggleGoalCompleted(id: number, userId: number, completed: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(goals).set({ completed }).where(and(eq(goals.id, id), eq(goals.userId, userId)));
+}
+
+export async function deleteGoal(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(goals).where(and(eq(goals.id, id), eq(goals.userId, userId)));
 }

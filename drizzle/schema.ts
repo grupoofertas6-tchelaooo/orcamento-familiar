@@ -116,3 +116,31 @@ export const cards = mysqlTable("cards", {
 
 export type Card = typeof cards.$inferSelect;
 export type InsertCard = typeof cards.$inferInsert;
+
+// Metas de poupanca
+export const goals = mysqlTable("goals", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  targetAmount: decimal("targetAmount", { precision: 15, scale: 2 }).notNull(),
+  currentAmount: decimal("currentAmount", { precision: 15, scale: 2 }).default("0").notNull(),
+  category: mysqlEnum("category", [
+    "Viagem",
+    "Casa",
+    "Carro",
+    "Educacao",
+    "Saude",
+    "Lazer",
+    "Outros",
+  ])
+    .default("Outros")
+    .notNull(),
+  dueDate: date("dueDate"),
+  completed: boolean("completed").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Goal = typeof goals.$inferSelect;
+export type InsertGoal = typeof goals.$inferInsert;

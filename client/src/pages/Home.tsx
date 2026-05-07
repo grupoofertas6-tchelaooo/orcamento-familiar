@@ -7,19 +7,21 @@ import Despesas from "./Despesas";
 import Receitas from "./Receitas";
 import Dividas from "./Dividas";
 import Cartao from "./Cartao";
+import Metas from "./Metas";
 import Calendario from "./Calendario";
 
 function fmt(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-type Tab = "despesas" | "receitas" | "dividas" | "cartao" | "calendario";
+type Tab = "despesas" | "receitas" | "dividas" | "cartao" | "metas" | "calendario";
 
 const TABS: { id: Tab; emoji: string; label: string }[] = [
   { id: "despesas", emoji: "💸", label: "Despesas" },
   { id: "receitas", emoji: "💵", label: "Receitas" },
   { id: "dividas", emoji: "⚠️", label: "Dívidas" },
   { id: "cartao", emoji: "💳", label: "Cartão" },
+  { id: "metas", emoji: "🏦", label: "Metas" },
   { id: "calendario", emoji: "📅", label: "Calendário" },
 ];
 
@@ -284,6 +286,7 @@ export default function Home() {
         {activeTab === "receitas" && <Receitas />}
         {activeTab === "dividas" && <Dividas />}
         {activeTab === "cartao" && <Cartao />}
+        {activeTab === "metas" && <Metas />}
         {activeTab === "calendario" && <Calendario />}
       </div>
     </div>

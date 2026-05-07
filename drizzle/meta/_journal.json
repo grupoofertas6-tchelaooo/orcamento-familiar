@@ -15,6 +15,13 @@
       "when": 1777627504113,
       "tag": "0001_open_susan_delgado",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1778145188171,
+      "tag": "0002_legal_slipstream",
+      "breakpoints": true
     }
   ]
 }

@@ -32,3 +32,14 @@
 ## Qualidade
 - [x] Vitest: testes dos routers financeiros
 - [x] Checkpoint final
+
+## Metas (NOVO)
+- [x] Schema Drizzle: tabela goals com categorias
+- [x] Migration SQL aplicada via webdev_execute_sql
+- [x] db.ts: helpers de query para Metas (CRUD + depósito)
+- [x] routers.ts: procedures tRPC para Metas
+- [x] Página Metas.tsx com formulário, listagem e depósito
+- [x] Botão Metas na navegação entre Cartão e Calendário
+- [x] Sistema de notificações ao atingir meta (toast)
+- [x] Barra de progresso visual por meta
+- [x] Marcar meta como concluída

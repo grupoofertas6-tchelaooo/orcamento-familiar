@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `goals` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`description` text,\n\t`targetAmount` decimal(15,2) NOT NULL,\n\t`currentAmount` decimal(15,2) NOT NULL DEFAULT '0',\n\t`category` enum('Viagem','Casa','Carro','Educacao','Saude','Lazer','Outros') NOT NULL DEFAULT 'Outros',\n\t`dueDate` date,\n\t`completed` boolean NOT NULL DEFAULT false,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `goals_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 39uw3BCt7u46e7V.root --database jc4PF84RD4paGJcTcaVr43 --execute CREATE TABLE `goals` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`description` text,\n\t`targetAmount` decimal(15,2) NOT NULL,\n\t`currentAmount` decimal(15,2) NOT NULL DEFAULT '0',\n\t`category` enum('Viagem','Casa','Carro','Educacao','Saude','Lazer','Outros') NOT NULL DEFAULT 'Outros',\n\t`dueDate` date,\n\t`completed` boolean NOT NULL DEFAULT false,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `goals_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 683
+}
