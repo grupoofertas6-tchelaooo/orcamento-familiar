@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Orçamento Familiar",
+    "slug": "family-budget",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#4A90D9"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.familybudget.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#4A90D9",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "package": "com.familybudget.app"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3319d9d5-4604-4d58-a166-e57b73fad126"
+      }
+    }
+  }
+}
