@@ -5,6 +5,15 @@ import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuth } from './AuthContext'
 import { PREMIUM_FEATURES } from '../utils/premiumFeatures'
+import { PRODUCT_IDS } from '../config/iap'
+import {
+  initConnection,
+  endConnection,
+  fetchProducts,
+  requestSubscription,
+  getAvailablePurchases,
+  finishTransaction,
+} from 'react-native-iap'
 
 const SubscriptionContext = createContext({})
 
@@ -15,9 +24,11 @@ export function SubscriptionProvider({ children }) {
   const [isPremium, setIsPremium] = useState(false)
   const [loading, setLoading] = useState(true)
   const [devMode, setDevMode] = useState(false)
+  const [products, setProducts] = useState([])
 
   useEffect(() => {
     init()
+    return () => { endConnection() }
   }, [user])
 
   const init = async () => {
@@ -39,6 +50,12 @@ export function SubscriptionProvider({ children }) {
 
       const fbPremium = await checkFirestorePremium()
       setIsPremium(fbPremium)
+
+      await initConnection()
+      const subs = await fetchProducts({
+        products: [PRODUCT_IDS.PREMIUM_MONTHLY, PRODUCT_IDS.PREMIUM_YEARLY],
+      })
+      setProducts(subs)
     } catch {
       setIsPremium(false)
     } finally {
@@ -67,22 +84,54 @@ export function SubscriptionProvider({ children }) {
     } catch {}
   }
 
-  const purchase = async () => {
-    Alert.alert(
-      'Em Breve',
-      'O sistema de pagamentos será ativado quando o app for publicado. Use o Modo Desenvolvedor para testar os recursos Pro.'
-    )
-    return false
+  const purchase = async (productId = PRODUCT_IDS.PREMIUM_MONTHLY) => {
+    try {
+      const purchaseResult = await requestSubscription({
+        sku: productId,
+        subscriptionOffers: [{ sku: productId, offerToken: '' }],
+      })
+
+      if (purchaseResult) {
+        const receipt = purchaseResult.transactionReceipt
+        if (receipt) {
+          setIsPremium(true)
+          await syncPremiumToFirestore(true)
+          await finishTransaction({ purchase: purchaseResult, isConsumable: false })
+          Alert.alert('Premium Ativado!', 'Aproveite todos os recursos Pro.')
+          return true
+        }
+      }
+      return false
+    } catch (err) {
+      if (err.code !== 'E_USER_CANCELLED') {
+        Alert.alert('Erro', 'Não foi possível processar o pagamento.')
+      }
+      return false
+    }
   }
 
   const restore = async () => {
-    const fbPremium = await checkFirestorePremium()
-    setIsPremium(fbPremium)
-    Alert.alert(
-      fbPremium ? 'Restaurado!' : 'Nenhum plano encontrado',
-      fbPremium ? 'Seu plano Pro foi restaurado.' : 'Você não possui assinaturas ativas.'
-    )
-    return fbPremium
+    try {
+      const purchases = await getAvailablePurchases()
+      const hasPremium = purchases.length > 0
+
+      if (hasPremium) {
+        setIsPremium(true)
+        await syncPremiumToFirestore(true)
+        Alert.alert('Restaurado!', 'Seu plano Pro foi restaurado.')
+      } else {
+        const fbPremium = await checkFirestorePremium()
+        setIsPremium(fbPremium)
+        Alert.alert(
+          fbPremium ? 'Restaurado!' : 'Nenhum plano encontrado',
+          fbPremium ? 'Seu plano Pro foi restaurado.' : 'Você não possui assinaturas ativas.'
+        )
+      }
+      return hasPremium
+    } catch {
+      Alert.alert('Erro', 'Não foi possível restaurar compras.')
+      return false
+    }
   }
 
   const toggleDevPremium = useCallback(async () => {
@@ -101,7 +150,7 @@ export function SubscriptionProvider({ children }) {
 
   return (
     <SubscriptionContext.Provider value={{
-      isPremium, loading, devMode,
+      isPremium, loading, devMode, products,
       purchase, restore,
       canAccess, toggleDevPremium,
     }}>

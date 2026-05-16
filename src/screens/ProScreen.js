@@ -7,7 +7,10 @@ import { PREMIUM_FEATURES, FEATURE_LABELS, FREE_FEATURES } from '../utils/premiu
 const PREMIUM_LIST = Object.values(PREMIUM_FEATURES).map((k) => FEATURE_LABELS[k])
 
 export default function ProScreen({ navigation }) {
-  const { isPremium, purchase, restore, devMode, toggleDevPremium } = useSubscription()
+  const { isPremium, products, purchase, restore, devMode, toggleDevPremium } = useSubscription()
+
+  const monthlyPrice = products.find(p => p.productId === 'premium_mensal')?.localizedPrice || 'R$ 9,90'
+  const yearlyPrice = products.find(p => p.productId === 'premium_anual')?.localizedPrice || 'R$ 99,90'
 
   return (
     <View style={styles.container}>
@@ -53,9 +56,14 @@ export default function ProScreen({ navigation }) {
           </View>
         ) : (
           <>
-            <TouchableOpacity style={styles.assinarBtn} onPress={purchase}>
-              <Text style={styles.assinarText}>Assinar Plano Pro</Text>
-              <Text style={styles.assinarSub}>R$ 9,90/mês • Cancele quando quiser</Text>
+            <TouchableOpacity style={styles.assinarBtn} onPress={() => purchase('premium_mensal')}>
+              <Text style={styles.assinarText}>Assinar Mensal</Text>
+              <Text style={styles.assinarSub}>{monthlyPrice}/mês • Cancele quando quiser</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.assinarBtn, styles.assinarBtnYearly]} onPress={() => purchase('premium_anual')}>
+              <Text style={styles.assinarText}>Assinar Anual</Text>
+              <Text style={styles.assinarSub}>{yearlyPrice}/ano • Economize comparado ao mensal</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.restoreBtn} onPress={restore}>
@@ -117,6 +125,7 @@ const styles = StyleSheet.create({
   },
   assinarText: { color: '#FFF', fontSize: 18, fontWeight: '700' },
   assinarSub: { color: '#FFF', fontSize: 12, opacity: 0.8, marginTop: 2 },
+  assinarBtnYearly: { backgroundColor: colors.success, marginTop: 0 },
   restoreBtn: { alignItems: 'center', paddingVertical: spacing.sm, marginBottom: spacing.lg },
   restoreText: { ...fonts.medium, color: colors.primary, fontSize: 14 },
   devSection: {
