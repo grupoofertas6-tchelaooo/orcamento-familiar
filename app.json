@@ -2,6 +2,7 @@
   "expo": {
     "name": "Orçamento Familiar",
     "slug": "family-budget",
+    "owner": "tchelaooo69",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,7 +27,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "3319d9d5-4604-4d58-a166-e57b73fad126"
+        "projectId": "3a87a088-bb83-40e6-a027-f68dbdc5c94b"
       }
     }
   }
